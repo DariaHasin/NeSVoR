@@ -50,6 +50,7 @@ def sample_slice(model: INR, slice: Slice, mask: Volume, args: Namespace) -> Sli
         v = model(xyz_masked, False).mean(-1)
         slice_sampled.mask = m.view(slice_sampled.mask.shape)
         slice_sampled.image[slice_sampled.mask] = v.to(slice_sampled.image.dtype)
+        torch.torch.cuda.empty_cache()
     return slice_sampled
 
 

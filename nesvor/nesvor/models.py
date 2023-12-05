@@ -4,6 +4,8 @@ from typing import Optional, Dict, Any, Union, TYPE_CHECKING
 import torch
 import torch.nn.functional as F
 import torch.nn as nn
+import sys
+sys.path.append('/content/drive/MyDrive/TAU/env/tcnn/dist-packages')
 import tinycudann as tcnn
 from ..transform import RigidTransform, ax_transform_points, mat_transform_points
 from ..utils import resolution2sigma
@@ -270,7 +272,12 @@ class NeSVoR(nn.Module):
         if self.args.slice_variance:
             var = var + self.log_var_slice.exp()[slice_idx]
         # losses
-        losses = {D_LOSS: ((v_out - v) ** 2 / (2 * var)).mean()}
+        brightness_weight = v.max()/v
+        squared_diff = (v_out - v) ** 2
+        weighted_diff = squared_diff * brightness_weight        
+        loss = (weighted_diff / (2 * var)).mean()
+        losses = {D_LOSS: loss}
+        # losses = {D_LOSS: ((v_out - v) ** 2 / (2 * var)).mean()}
         if self.args.pixel_variance or self.args.slice_variance:
             losses[S_LOSS] = 0.5 * var.log().mean()
             losses[DS_LOSS] = losses[D_LOSS] + losses[S_LOSS]
