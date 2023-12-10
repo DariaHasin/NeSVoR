@@ -47,10 +47,10 @@ def sample_slice(model: INR, slice: Slice, mask: Volume, args: Namespace) -> Sli
             resolution2sigma(slice_sampled.resolution_xyz, isotropic=False),
             args.n_inference_samples if args.output_psf else 0,
         )
-        v = model(xyz_masked, False).mean(-1)
+        v, pe, z = model(xyz_masked, True).mean(-1)
         slice_sampled.mask = m.view(slice_sampled.mask.shape)
-        slice_sampled.image[slice_sampled.mask] = v.to(slice_sampled.image.dtype)
-    torch.torch.cuda.empty_cache()
+        slice_sampled.image[slice_sampled.mask] = z.to(slice_sampled.image.dtype)
+    torch.cuda.empty_cache()
     return slice_sampled
 
 
