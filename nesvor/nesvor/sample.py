@@ -5,6 +5,7 @@ from ..transform import transform_points
 from ..image import Slice, Volume
 from .models import INR
 from ..utils import resolution2sigma, meshgrid
+import pdb
 
 
 def sample_volume(model: INR, mask: Volume, args: Namespace) -> Volume:
@@ -47,10 +48,9 @@ def sample_slice(model: INR, slice: Slice, mask: Volume, args: Namespace) -> Sli
             resolution2sigma(slice_sampled.resolution_xyz, isotropic=False),
             args.n_inference_samples if args.output_psf else 0,
         )
-        v, pe, z = model(xyz_masked, True).mean(-1)
+        v = model(xyz_masked, False).mean(-1)
         slice_sampled.mask = m.view(slice_sampled.mask.shape)
-        slice_sampled.image[slice_sampled.mask] = z.to(slice_sampled.image.dtype)
-    torch.cuda.empty_cache()
+        slice_sampled.image[slice_sampled.mask] = v.to(slice_sampled.image.dtype)
     return slice_sampled
 
 
@@ -61,5 +61,7 @@ def sample_slices(
     with torch.no_grad():
         slices_sampled = []
         for i, slice in enumerate(slices):
+            torch.cuda.empty_cache()
+            print('i is: ', i)
             slices_sampled.append(sample_slice(model, slice, mask, args))
     return slices_sampled
