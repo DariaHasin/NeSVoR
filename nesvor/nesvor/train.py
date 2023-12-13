@@ -229,4 +229,5 @@ def train(slices: List[Slice], args: Namespace) -> Tuple[INR, List[Slice], Volum
         output_slice = slices[i].clone()
         output_slice.transformation = transformation[i]
         output_slices.append(output_slice)
-    return model.inr, output_slices, mask
+    return model, output_slices, mask
+    #return model.inr, output_slices, mask

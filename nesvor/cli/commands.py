@@ -141,7 +141,7 @@ class SampleSlices(Command):
             input_dict["model"], input_dict["input_slices"], input_dict["mask"], args
         )
         self.new_timer("Results saving")
-        outputs({"simulated_slices": simulated_slices}, args)
+        outputs({"simulated_slices": []}, args)
 
 
 class Register(Command):
