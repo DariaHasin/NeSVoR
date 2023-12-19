@@ -172,6 +172,10 @@ def sample_slices(
             torch.cuda.empty_cache()
             print('i is: ', i)
             # slices_sampled.append(sample_slice(model, slice, mask, args))
-            slices_sampled = sample_slice_var(model, slice, mask, i, args)
+            try:
+              slices_sampled = sample_slice_var(model, slice, mask, i, args)
+            except:
+              print("sample_slice_var FAILED")
+              break
             slices_sampled.save(os.path.join(args.simulated_slices, f"{i}.nii.gz"), True)
     return slices_sampled

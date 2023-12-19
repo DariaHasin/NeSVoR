@@ -46,8 +46,8 @@ def outputs(data: Dict, args: Namespace) -> None:
         )
     if getattr(args, "output_slices", None) and "output_slices" in data:
         save_slices(args.output_slices, data["output_slices"])
-    if getattr(args, "simulated_slices", None) and "simulated_slices" in data:
-        save_slices(args.simulated_slices, data["simulated_slices"])
+    #if getattr(args, "simulated_slices", None) and "simulated_slices" in data:
+    #    save_slices(args.simulated_slices, data["simulated_slices"])
 
 
 def load_model(args: Namespace) -> Tuple[INR, Volume, Namespace]:
