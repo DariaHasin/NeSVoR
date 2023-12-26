@@ -5,7 +5,7 @@ import torch
 import torch.nn.functional as F
 import torch.nn as nn
 import sys
-# sys.path.append('/content/drive/MyDrive/TAU/env/tcnn/dist-packages')
+sys.path.append('/content/drive/MyDrive/TAU/env/tcnn/tinycudanndist-packages-T4')
 import tinycudann as tcnn
 from ..transform import RigidTransform, ax_transform_points, mat_transform_points
 from ..utils import resolution2sigma
