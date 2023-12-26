@@ -38,8 +38,9 @@ def outputs(data: Dict, args: Namespace) -> None:
     if getattr(args, "output_model", None) and "output_model" in data:
         torch.save(
             {
-                "model": data["output_model"].state_dict(),
+                "model": data["output_model"],
                 "mask": data["mask"],
+                "slices": data["output_slices"],
                 "args": args,
             },
             args.output_model,
