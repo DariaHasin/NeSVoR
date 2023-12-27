@@ -106,26 +106,56 @@ def sample_points(model: INR, xyz: torch.Tensor, args: Namespace) -> torch.Tenso
             v[i : i + batch_size] = v_b
     return v.view(shape)
 
-
 def sample_slice(model: INR, slice: Slice, mask: Volume, args: Namespace) -> Slice:
-    # clone the slice
-    slice_sampled = slice.clone()
-    slice_sampled.image = torch.zeros_like(slice_sampled.image)
-    slice_sampled.mask = torch.zeros_like(slice_sampled.mask)
-    xyz = meshgrid(slice_sampled.shape_xyz, slice_sampled.resolution_xyz).view(-1, 3)
-    m = mask.sample_points(transform_points(slice_sampled.transformation, xyz)) > 0
-    if m.any():
-        xyz_masked = model.inr.sample_batch(
-            xyz[m],
-            slice_sampled.transformation,
-            resolution2sigma(slice_sampled.resolution_xyz, isotropic=False),
-            args.n_inference_samples if args.output_psf else 0,
+  slice_sampled = slice.clone()
+  shape = slice_sampled.image.shape
+  slice_sampled.image = torch.zeros_like(slice_sampled.image)
+  slice_sampled.mask = torch.zeros_like(slice_sampled.mask)
+  xyz = meshgrid(slice_sampled.shape_xyz, slice_sampled.resolution_xyz).view(-1, 3)
+  m = mask.sample_points(transform_points(slice_sampled.transformation, xyz)) > 0
+
+  slice_sampled.image = slice_sampled.image.view(-1)
+  slice_sampled.mask = slice_sampled.mask.view(-1)
+#   batch_size = 1024*4
+  batch_size = args.inference_batch_size
+  
+  with torch.no_grad():
+      for i in range(0, xyz.shape[0], batch_size):
+        xyz_batch = xyz[i : i + batch_size]
+        xyz_batch = model.inr.sample_batch(
+          xyz_batch,
+          slice_sampled.transformation,
+          resolution2sigma(slice_sampled.resolution_xyz, isotropic=False),
+          args.n_inference_samples if args.output_psf else 0,
         )
-        breakpoint()
-        v = model.inr(xyz_masked, False).mean(-1)
+        v_b = model.inr(xyz_batch, False).mean(-1)
         slice_sampled.mask = m.view(slice_sampled.mask.shape)
-        slice_sampled.image[slice_sampled.mask] = v.to(slice_sampled.image.dtype)
-    return slice_sampled
+        slice_sampled.image[i : i + xyz_batch.size()[0]] = v_b.to(slice_sampled.image.dtype)
+  
+  slice_sampled.image[~slice_sampled.mask] = 0
+  slice_sampled.image = slice_sampled.image.view(shape)
+  return slice_sampled
+
+
+# def sample_slice(model: INR, slice: Slice, mask: Volume, args: Namespace) -> Slice:
+#     # clone the slice
+#     slice_sampled = slice.clone()
+#     slice_sampled.image = torch.zeros_like(slice_sampled.image)
+#     slice_sampled.mask = torch.zeros_like(slice_sampled.mask)
+#     xyz = meshgrid(slice_sampled.shape_xyz, slice_sampled.resolution_xyz).view(-1, 3)
+#     m = mask.sample_points(transform_points(slice_sampled.transformation, xyz)) > 0
+#     if m.any():
+#         xyz_masked = model.inr.sample_batch(
+#             xyz[m],
+#             slice_sampled.transformation,
+#             resolution2sigma(slice_sampled.resolution_xyz, isotropic=False),
+#             args.n_inference_samples if args.output_psf else 0,
+#         )
+#         breakpoint()
+#         v = model.inr(xyz_masked, False).mean(-1)
+#         slice_sampled.mask = m.view(slice_sampled.mask.shape)
+#         slice_sampled.image[slice_sampled.mask] = v.to(slice_sampled.image.dtype)
+#     return slice_sampled
 
 
 def sample_slice_var(model, slice_i, mask, i ,args):
