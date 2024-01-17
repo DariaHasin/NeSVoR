@@ -124,5 +124,5 @@ def sample_slices(
               except:
                 print("sample_slice_var FAILED")
                 break
-              slices_sampled.save(os.path.join(args.simulated_slices, f"{i}.nii.gz"), True)
+              slices_sampled.save(os.path.join(args.simulated_slices, f"{i}.nii.gz"), False)
     return slices_sampled
