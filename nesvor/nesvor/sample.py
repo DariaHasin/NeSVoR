@@ -117,7 +117,7 @@ def sample_slices(
           slices_sampled = []
           for i, slice in enumerate(slices):
               torch.cuda.empty_cache()
-              print('i is: ', i)
+              # print('i is: ', i)
               # slices_sampled.append(sample_slice(model, slice, mask, args))
               try:
                 slices_sampled = sample_slice_var(model, slice, mask, i, args)
