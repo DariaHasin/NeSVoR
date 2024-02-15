@@ -277,7 +277,7 @@ class NeSVoR(nn.Module):
         # weighted_diff = squared_diff * brightness_weight        
         # loss = (weighted_diff / (2 * var)).mean()
         # losses = {D_LOSS: loss}
-        losses = {D_LOSS: ((v_out - v) ** 2 / (2 * var)).mean()}
+        losses = {D_LOSS: ((v_out - v) ** 2 * (var)).mean()}
         if self.args.pixel_variance or self.args.slice_variance:
             losses[S_LOSS] = 0.5 * var.log().mean()
             losses[DS_LOSS] = losses[D_LOSS] + losses[S_LOSS]
