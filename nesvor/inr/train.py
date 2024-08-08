@@ -6,7 +6,7 @@ import torch
 import torch.optim as optim
 import logging
 from ..utils import MovingAverage, log_params, TrainLogger
-from .models import INR, NeSVoR, D_LOSS, S_LOSS, DS_LOSS, I_REG, B_REG, T_REG, D_REG
+from .models import INR, NeSVoR, D_LOSS, S_LOSS, CE_LOSS, DS_LOSS, I_REG, B_REG, T_REG, D_REG
 from ..transform import RigidTransform
 from ..image import Volume, Slice
 from .data import PointDataset
@@ -81,6 +81,7 @@ def train(slices: List[Slice], args: Namespace) -> Tuple[INR, List[Slice], Volum
     model.train()
     loss_weights = {
         D_LOSS: 1,
+        CE_LOSS: 1,
         S_LOSS: 1,
         T_REG: args.weight_transformation,
         B_REG: args.weight_bias,

@@ -21,6 +21,7 @@ if not USE_TORCH:
 
 # key for loss/regularization
 D_LOSS = "MSE"
+CE_LOSS = "binaryCrossEntropyWithLogits"
 S_LOSS = "logVar"
 DS_LOSS = "MSE+logVar"
 B_REG = "biasReg"
@@ -440,6 +441,7 @@ class NeSVoR(nn.Module):
             var = var + self.log_var_slice.exp()[slice_idx]
         # losses
         losses = {D_LOSS: ((v_out - v) ** 2 / (2 * var)).mean()}
+        losses[CE_LOSS] = F.binary_cross_entropy_with_logits(v_out, v)
         if not (self.args.no_pixel_variance and self.args.no_slice_variance):
             losses[S_LOSS] = 0.5 * var.log().mean()
             losses[DS_LOSS] = losses[D_LOSS] + losses[S_LOSS]
